@@ -1,0 +1,19 @@
+{
+  "name": "travis-dataset",
+  "version": "1.0.0",
+  "description": "Build a dataset a travis failure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dataset",
+    "java"
+  ],
+  "author": "Thomas Durieux",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^2.1.14",
+    "travis-ci": "^2.1.0"
+  }
+}
