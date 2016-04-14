@@ -25,7 +25,33 @@ db.repos.aggregate(
     ]
 )
 
-// count the number of failed build
+// count the number of project that have more that 10 failure
+db.repos.aggregate([
+    {
+        $match: {
+            "builds.state": "failed",
+            "builds.1000": {"$exists": true},
+            "builds.config.language": "java"
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            builds: {
+                $filter: {
+                    input: "$builds",
+                    as: "build",
+                    cond: { $eq: [ "$$build.state", "failed" ] }
+                }
+            },
+            owner: 1,
+            name: 1
+        }
+    },
+    { $group: { _id: null, count: { $sum: 1 } } }
+])
+
+// count the number of failed builds
 db.repos.aggregate([
     {
         $match: {
@@ -48,7 +74,7 @@ db.repos.aggregate([
             name: 1
         }
     },
-    { $group: { _id: null, count: { $sum: 1 } } }
+    { $group: { _id: null, count: { $sum: {$size: "$builds"} } } }
 ])
 
 // find failed java builds
