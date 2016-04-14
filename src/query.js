@@ -1,11 +1,5 @@
-db.repos.aggregate([{"$project": {
-    item: 1,
-    name: "$name",
-    countBuild: {
-        $size: { "$ifNull": [ "$builds", [] ] }
-    }
-}}])
 
+// count the number of builds
 db.repos.aggregate(
     [
         {
@@ -18,6 +12,7 @@ db.repos.aggregate(
     ]
 )
 
+// count the number of builds per repository
 db.repos.aggregate(
     [
         {
@@ -30,27 +25,40 @@ db.repos.aggregate(
     ]
 )
 
-db.repos.aggregate(
-    [
-        {
-            $group:
-            {
-                _id: {owner:"$owner", name: "$name"},
-                count: { $sum: {$size: { "$ifNull": [ {
-                    items: {
-                        $filter: {
-                            input: "$builds",
-                            as: "build",
-                            cond: { $eq: [ "$$build.state", "failed" ] }
-                        }
-                    }
-                }, [] ] }} }
-            }
-        }
-    ]
-)
-
+// count the number of failed build
 db.repos.aggregate([
+    {
+        $match: {
+            "builds.state": "failed",
+            // "builds.1000": {"$exists": true},
+            "builds.config.language": "java"
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            builds: {
+                $filter: {
+                    input: "$builds",
+                    as: "build",
+                    cond: { $eq: [ "$$build.state", "failed" ] }
+                }
+            },
+            owner: 1,
+            name: 1
+        }
+    },
+    { $group: { _id: null, count: { $sum: 1 } } }
+])
+
+// find failed java builds
+db.repos.aggregate([
+    {
+        $match: {
+            "builds.state": "failed",
+            "builds.config.language": "java"
+        }
+    },
     {
         $project: {
             builds: {
@@ -64,12 +72,10 @@ db.repos.aggregate([
     }
 ])
 
-db.repos.find({
-    "builds.state": "failed"
-})
-
+// count repositories that have failed build
 db.repos.count({
     "builds.state": "failed"
 })
 
+// count repositories that have at least one build
 db.repos.count({"builds.0": {"$exists": true}})
