@@ -12,6 +12,43 @@ setTimeout(function () {
     }, 20000);
 }, 60 - new Date().getSeconds() * 1000);
 
+
+function getJob(jobId) {
+    return new Promise(function (resolve, reject) {
+        if (countRequestPerMinutes < 500) {
+            countRequestPerMinutes++;
+            return travis.jobs(jobId, function (err, res) {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res);
+            });
+        } else {
+            return setTimeout(function () {
+                return getJob(jobId).then(resolve, reject);
+            }, 2000);
+        }
+    });
+}
+
+function getLog(jobId) {
+    return new Promise(function (resolve, reject) {
+        if (countRequestPerMinutes < 500) {
+            countRequestPerMinutes++;
+            return travis.jobs(jobId).log.get(function (err, res) {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res);
+            });
+        } else {
+            return setTimeout(function () {
+                return getLog(jobId).then(resolve, reject);
+            }, 2000);
+        }
+    });
+}
+
 function getBuilds(organisation, project, after_number) {
     const options = {};
     if (after_number) {
@@ -22,7 +59,6 @@ function getBuilds(organisation, project, after_number) {
             countRequestPerMinutes++;
             return travis.repos(organisation, project).builds().get(options, function (err, builds) {
                 if (err) {
-                    console.error(countRequestPerMinutes);
                     return reject(err);
                 }
                 return resolve(builds);
@@ -65,6 +101,8 @@ function parseGithubURL(url) {
     };
 }
 
+module.exports.getLog = getLog;
+module.exports.getJob = getJob;
 module.exports.getBuilds = getBuilds;
 module.exports.getAllBuilds = getAllBuilds;
 module.exports.parseGithubURL = parseGithubURL;

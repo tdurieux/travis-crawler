@@ -1,5 +1,5 @@
 {
-  "name": "travis-dataset",
+  "name": "travis-crawler",
   "version": "1.0.0",
   "description": "Build a dataset a travis failure",
   "main": "index.js",
@@ -13,9 +13,11 @@
   "author": "Thomas Durieux",
   "license": "MIT",
   "dependencies": {
+    "async": "^1.5.2",
+    "fast-csv": "^1.1.0",
     "github": "^0.2.4",
     "mongodb": "^2.1.14",
-    "travis-ci": "^2.1.0",
-    "fast-csv": "^1.1.0"
+    "request": "^2.72.0",
+    "travis-ci": "^2.1.0"
   }
 }

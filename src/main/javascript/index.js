@@ -1,5 +1,4 @@
 const getAllBuilds = require('./utils').getAllBuilds;
-const getBuilds = require('./utils').getBuilds;
 const parseGithubURL = require('./utils').parseGithubURL;
 
 var MongoClient = require('mongodb').MongoClient
