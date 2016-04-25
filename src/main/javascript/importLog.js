@@ -7,12 +7,12 @@ var MongoClient = require('mongodb').MongoClient
 
 var urlDataset = 'mongodb://localhost:27017/travisDataset';
 // Use connect method to connect to the Server
-MongoClient.connect(urlDataset, function(err, db) {
+MongoClient.connect(urlDataset, function (err, db) {
     if (err) {
         return console.error(err);
     }
     console.log("Connected correctly to server");
-    
+
     const requestRepos = db.collection("repos").aggregate([
         {
             $match: {
@@ -28,7 +28,7 @@ MongoClient.connect(urlDataset, function(err, db) {
                     $filter: {
                         input: "$builds",
                         as: "build",
-                        cond: { $eq: [ "$$build.state", "failed" ] }
+                        cond: {$eq: ["$$build.state", "failed"]}
                     }
                 },
                 owner: 1,
@@ -36,7 +36,6 @@ MongoClient.connect(urlDataset, function(err, db) {
             }
         }
     ]);
-    var exceptionTypes = {};
     var count = 0;
     requestRepos.on('data', function (data) {
         requestRepos.pause();
@@ -44,10 +43,10 @@ MongoClient.connect(urlDataset, function(err, db) {
         const builds = data.builds;
         delete data.builds;
         async.eachLimit(builds, 8, function (build, callback) {
-            count ++;
-	    if (build.id == 106229838 || build.id == 106220353) {
-		return callback();
-	    }
+            count++;
+            if (build.id == 106229838 || build.id == 106220353) {
+                return callback();
+            }
             db.collection('build').findOne({
                 "id": build.id
             }, function (err, result) {
@@ -58,23 +57,26 @@ MongoClient.connect(urlDataset, function(err, db) {
                     return callback();
                 }
                 var logs = {};
-		console.log("Begin " + data.owner + "/" + data.name + " "  + build.id)
+                console.log("Begin " + data.owner + "/" + data.name + " " + build.id)
                 async.eachSeries(build.job_ids, function (job_id, callbackJob) {
                     getLog(job_id).then(function (log) {
-			if (typeof log === 'string' || log instanceof String) {
-			} else {
+                        if (typeof log === 'string' || log instanceof String) {
+                        } else {
                             return callbackJob();
                         }
-			if (!log) {
+                        if (!log) {
                             return callbackJob();
                         }
-			if (!log.length) {
-			    console.log('Error log', log);
+                        if (!log.length) {
+                            console.log('Error log', log);
                             return callbackJob();
-			}
-			console.log(log.length);
+                        }
+                        console.log(log.length);
                         countLog++;
-                        request.post({url: 'http://localhost:7070/', body: log}, function(error, httpResponse) {
+                        request.post({
+                            url: 'http://localhost:7070/',
+                            body: log
+                        }, function (error, httpResponse) {
                             if (error) {
                                 return callbackJob();
                             }
@@ -100,12 +102,12 @@ MongoClient.connect(urlDataset, function(err, db) {
                     }
                     build.logs = logs;
                     build.repo = data;
-                    db.collection("build").insertOne(build, function(err, result) {
+                    db.collection("build").insertOne(build, function (err, result) {
                         if (err) {
-			    console.error(err);
+                            console.error(err);
                             return callback(err);
                         }
-                        console.log("End " + data.owner + "/" + data.name + " "  + build.id + " " + err)
+                        console.log("End " + data.owner + "/" + data.name + " " + build.id + " " + err)
                         callback();
                     });
                 })
@@ -119,7 +121,7 @@ MongoClient.connect(urlDataset, function(err, db) {
         });
     });
     requestRepos.once("end", function () {
-console.log("close");
-db.close();
+        console.log("close");
+        db.close();
     })
 });

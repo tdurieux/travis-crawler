@@ -1,12 +1,10 @@
-
 // count the number of builds
 db.repos.aggregate(
     [
         {
-            $group:
-            {
+            $group: {
                 _id: 1,
-                count: { $sum: {$size: { "$ifNull": [ "$builds", [] ] }} }
+                count: {$sum: {$size: {"$ifNull": ["$builds", []]}}}
             }
         }
     ]
@@ -16,10 +14,9 @@ db.repos.aggregate(
 db.repos.aggregate(
     [
         {
-            $group:
-            {
-                _id: {owner:"$owner", name: "$name"},
-                count: { $sum: {$size: { "$ifNull": [ "$builds", [] ] }} }
+            $group: {
+                _id: {owner: "$owner", name: "$name"},
+                count: {$sum: {$size: {"$ifNull": ["$builds", []]}}}
             }
         }
     ]
@@ -41,14 +38,14 @@ db.repos.aggregate([
                 $filter: {
                     input: "$builds",
                     as: "build",
-                    cond: { $eq: [ "$$build.state", "failed" ] }
+                    cond: {$eq: ["$$build.state", "failed"]}
                 }
             },
             owner: 1,
             name: 1
         }
     },
-    { $group: { _id: null, count: { $sum: 1 } } }
+    {$group: {_id: null, count: {$sum: 1}}}
 ])
 
 // count the number of failed builds
@@ -67,14 +64,14 @@ db.repos.aggregate([
                 $filter: {
                     input: "$builds",
                     as: "build",
-                    cond: { $eq: [ "$$build.state", "failed" ] }
+                    cond: {$eq: ["$$build.state", "failed"]}
                 }
             },
             owner: 1,
             name: 1
         }
     },
-    { $group: { _id: null, count: { $sum: {$size: "$builds"} } } }
+    {$group: {_id: null, count: {$sum: {$size: "$builds"}}}}
 ])
 
 // find failed java builds
@@ -91,7 +88,7 @@ db.repos.aggregate([
                 $filter: {
                     input: "$builds",
                     as: "build",
-                    cond: { $eq: [ "$$build.state", "failed" ] }
+                    cond: {$eq: ["$$build.state", "failed"]}
                 }
             }
         }

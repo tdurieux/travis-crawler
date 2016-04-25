@@ -54,7 +54,7 @@ function getBuilds(organisation, project, after_number) {
     if (after_number) {
         options.after_number = after_number;
     }
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         if (countRequestPerMinutes < 500) {
             countRequestPerMinutes++;
             return travis.repos(organisation, project).builds().get(options, function (err, builds) {
@@ -72,7 +72,7 @@ function getBuilds(organisation, project, after_number) {
 }
 
 function getAllBuilds(organisation, project, after_number) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         getBuilds(organisation, project, after_number).then(function (builds) {
             const length = builds.builds.length;
             if (length < 25) {

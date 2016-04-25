@@ -4,21 +4,25 @@ var MongoClient = require('mongodb').MongoClient
 var csv = require("fast-csv");
 
 csv.fromPath("data/top_projects.csv")
-    .on("data", function(data){
+    .on("data", function (data) {
         console.log(data);
     })
-    .on("end", function(){
+    .on("end", function () {
         console.log("done");
     });
 return;
 
 var urlDataset = 'mongodb://localhost:27017/travisDataset';
 // Use connect method to connect to the Server
-MongoClient.connect(urlDataset, function(err, db) {
+MongoClient.connect(urlDataset, function (err, db) {
     assert.equal(null, err);
     console.log("Connected correctly to server");
     var collection = githubDb.collection('repos');
-    const reposStream = collection.find({"language": "Java", "fork": false, "private": false});
+    const reposStream = collection.find({
+        "language": "Java",
+        "fork": false,
+        "private": false
+    });
     reposStream.on('data', function (repo) {
         getBuilds(repo.owner.login, repo.name).then(function (data) {
             if (data.builds.length == 0) {
@@ -28,7 +32,7 @@ MongoClient.connect(urlDataset, function(err, db) {
         });
         //getAllBuilds("tdurieux", "leboncoin-api").then(console.log);
     });
-    reposStream.once('end', function() {
+    reposStream.once('end', function () {
         console.log("END");
         githubDb.close();
         db.close();
@@ -44,7 +48,7 @@ function getBuilds(organisation, project, after_number) {
     if (after_number) {
         options.after_number = after_number;
     }
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         travis.repos(organisation, project).builds().get(options, function (err, builds) {
             if (err) {
                 return reject(err);
@@ -55,7 +59,7 @@ function getBuilds(organisation, project, after_number) {
 }
 
 function getAllBuilds(organisation, project, after_number) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         getBuilds(organisation, project, after_number).then(function (builds) {
             const length = builds.builds.length;
             if (length < 25) {

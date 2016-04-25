@@ -3,9 +3,9 @@ var MongoClient = require('mongodb').MongoClient
 
 var urlDataset = 'mongodb://localhost:27017/travisDataset';
 // Use connect method to connect to the Server
-MongoClient.connect(urlDataset, function(err, db) {
+MongoClient.connect(urlDataset, function (err, db) {
     console.log("Connected correctly to server");
-    
+
     db.collection("repos").aggregate([
         {
             $match: {
@@ -20,7 +20,7 @@ MongoClient.connect(urlDataset, function(err, db) {
                     $filter: {
                         input: "$builds",
                         as: "build",
-                        cond: { $eq: [ "$$build.state", "failed" ] }
+                        cond: {$eq: ["$$build.state", "failed"]}
                     }
                 },
                 owner: 1,
